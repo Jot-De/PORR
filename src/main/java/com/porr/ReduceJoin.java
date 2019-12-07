@@ -20,6 +20,7 @@ public class ReduceJoin {
             String record = value.toString();
             String[] parts = record.split(",");
             context.write(new Text(parts[0]), new Text("cust   " + parts[1]));
+            System.out.println(context);
         }
     }
 
@@ -31,6 +32,7 @@ public class ReduceJoin {
             String record = value.toString();
             String[] parts = record.split(",");
             context.write(new Text(parts[2]), new Text("tnxn   " + parts[3]));
+            System.out.println(context);
         }
     }
 
