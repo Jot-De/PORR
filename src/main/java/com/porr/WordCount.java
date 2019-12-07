@@ -1,72 +1,56 @@
 package com.porr;
-
-import java.util.*;
-
 import java.io.IOException;
-
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.*;
-import org.apache.hadoop.mapred.*;
-
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.util.GenericOptionsParser;
 public class WordCount {
-    //Mapper class
-    public static class E_EMapper extends MapReduceBase implements
-            Mapper<LongWritable ,/*Input key Type */
-                    Text,                /*Input value Type*/
-                    Text,                /*Output key Type*/
-                    IntWritable>        /*Output value Type*/
+    public static void main(String [] args) throws Exception
     {
-        //Map function
-        public void map(LongWritable key, Text value,
-                        OutputCollector<Text, IntWritable> output,
-
-                        Reporter reporter) throws IOException {
+        Configuration c=new Configuration();
+        String[] files=new GenericOptionsParser(c,args).getRemainingArgs();
+        Path input=new Path(files[0]);
+        Path output=new Path(files[1]);
+        Job j=new Job(c,"wordcount");
+        j.setJarByClass(WordCount.class);
+        j.setMapperClass(MapForWordCount.class);
+        j.setReducerClass(ReduceForWordCount.class);
+        j.setOutputKeyClass(Text.class);
+        j.setOutputValueClass(IntWritable.class);
+        FileInputFormat.addInputPath(j, input);
+        FileOutputFormat.setOutputPath(j, output);
+        System.exit(j.waitForCompletion(true)?0:1);
+    }
+    public static class MapForWordCount extends Mapper<LongWritable, Text, Text, IntWritable>{
+        public void map(LongWritable key, Text value, Context con) throws IOException, InterruptedException
+        {
             String line = value.toString();
-            String lasttoken = null;
-            StringTokenizer s = new StringTokenizer(line,"\t");
-            String year = s.nextToken();
-
-            while(s.hasMoreTokens()) {
-                lasttoken = s.nextToken();
-            }
-            int avgprice = Integer.parseInt(lasttoken);
-            output.collect(new Text(year), new IntWritable(avgprice));
-        }
-    }
-
-    //Reducer class
-    public static class E_EReduce extends MapReduceBase implements Reducer< Text, IntWritable, Text, IntWritable > {
-
-        //Reduce function
-        public void reduce( Text key, Iterator <IntWritable> values,
-                            OutputCollector<Text, IntWritable> output, Reporter reporter) throws IOException {
-            int maxavg = 30;
-            int val = Integer.MIN_VALUE;
-
-            while (values.hasNext()) {
-                if((val = values.next().get())>maxavg) {
-                    output.collect(key, new IntWritable(val));
-                }
+            String[] words=line.split(",");
+            for(String word: words )
+            {
+                Text outputKey = new Text(word.toUpperCase().trim());
+                IntWritable outputValue = new IntWritable(1);
+                con.write(outputKey, outputValue);
             }
         }
     }
-
-    //Main function
-    public static void main(String args[])throws Exception {
-        JobConf conf = new JobConf(WordCount.class);
-
-        conf.setJobName("max_eletricityunits");
-        conf.setOutputKeyClass(Text.class);
-        conf.setOutputValueClass(IntWritable.class);
-        conf.setMapperClass(E_EMapper.class);
-        conf.setCombinerClass(E_EReduce.class);
-        conf.setReducerClass(E_EReduce.class);
-        conf.setInputFormat(TextInputFormat.class);
-        conf.setOutputFormat(TextOutputFormat.class);
-
-        FileInputFormat.setInputPaths(conf, new Path(args[0]));
-        FileOutputFormat.setOutputPath(conf, new Path(args[1]));
-
-        JobClient.runJob(conf);
+    public static class ReduceForWordCount extends Reducer<Text, IntWritable, Text, IntWritable>
+    {
+        public void reduce(Text word, Iterable<IntWritable> values, Context con) throws IOException, InterruptedException
+        {
+            int sum = 0;
+            for(IntWritable value : values)
+            {
+                sum += value.get();
+            }
+            con.write(word, new IntWritable(sum));
+        }
     }
 }
