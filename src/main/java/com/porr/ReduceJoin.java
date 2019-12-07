@@ -10,8 +10,12 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.log4j.Logger;
 
 public class ReduceJoin {
+
+    private static Logger logger = Logger.getLogger(ReduceJoin.class);
+
     public static class CustsMapper extends Mapper <Object, Text, Text, Text>
     {
         public void map(Object key, Text value, Context context)
@@ -46,7 +50,7 @@ public class ReduceJoin {
             int count = 0;
             for (Text t : values)
             {
-                String parts[] = t.toString().split("  ");
+                String parts[] = t.toString().split("   ");
                 if (parts[0].equals("tnxn"))
                 {
                     count++;
