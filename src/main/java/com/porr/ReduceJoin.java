@@ -14,7 +14,6 @@ import org.apache.log4j.Logger;
 
 public class ReduceJoin {
 
-    private static Logger logger = Logger.getLogger(ReduceJoin.class);
 
     public static class CustsMapper extends Mapper <Object, Text, Text, Text>
     {
@@ -35,7 +34,7 @@ public class ReduceJoin {
         {
             String record = value.toString();
             String[] parts = record.split(",");
-            context.write(new Text(parts[2]), new Text("tnxn   " + parts[3]));
+            context.write(new Text(parts[0]), new Text("tnxn   " + parts[1]));
             System.out.println(context);
         }
     }
@@ -46,7 +45,6 @@ public class ReduceJoin {
                 throws IOException, InterruptedException
         {
             String name = "";
-            double total = 0.0;
             int count = 0;
             for (Text t : values)
             {
@@ -54,14 +52,13 @@ public class ReduceJoin {
                 if (parts[0].equals("tnxn"))
                 {
                     count++;
-                    total += Float.parseFloat(parts[1]);
                 }
                 else if (parts[0].equals("cust"))
                 {
                     name = parts[1];
                 }
             }
-            String str = String.format("%d %f", count, total);
+            String str = String.format("%d", count);
             context.write(new Text(name), new Text(str));
         }
     }
