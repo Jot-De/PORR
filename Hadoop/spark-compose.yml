@@ -31,5 +31,5 @@ services:
       - "constraint:node==<yourworkernode>"
   spark-job:
     build:
-      context: ./
+      context: ..
 
