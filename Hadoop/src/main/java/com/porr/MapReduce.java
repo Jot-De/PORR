@@ -10,9 +10,8 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.log4j.Logger;
 
-public class ReduceJoin {
+public class MapReduce {
 
 
     public static class CustsMapper extends Mapper <Object, Text, Text, Text>
@@ -22,8 +21,7 @@ public class ReduceJoin {
         {
             String record = value.toString();
             String[] parts = record.split(",");
-            context.write(new Text(parts[0]), new Text("cust   " + parts[1]));
-            context.write(new Text(parts[1]), new Text("cust   " + parts[0]));
+            context.write(new Text(parts[0]), new Text("name   " + parts[1]));
             System.out.println(context);
         }
     }
@@ -35,7 +33,8 @@ public class ReduceJoin {
         {
             String record = value.toString();
             String[] parts = record.split(",");
-            context.write(new Text(parts[0]), new Text("tnxn   " + parts[1]));
+            context.write(new Text(parts[0]), new Text("rel   " + parts[1]));
+            context.write(new Text(parts[1]), new Text("rel   " + parts[0]));
             System.out.println(context);
         }
     }
@@ -50,11 +49,11 @@ public class ReduceJoin {
             for (Text t : values)
             {
                 String parts[] = t.toString().split("   ");
-                if (parts[0].equals("tnxn"))
+                if (parts[0].equals("rel"))
                 {
                     count++;
                 }
-                else if (parts[0].equals("cust"))
+                else if (parts[0].equals("name"))
                 {
                     name = parts[1];
                 }
@@ -67,7 +66,7 @@ public class ReduceJoin {
     public static void main(String[] args) throws Exception {
         Configuration conf = new Configuration();
         Job job = new Job(conf, "Reduce-side join");
-        job.setJarByClass(ReduceJoin.class);
+        job.setJarByClass(MapReduce.class);
         job.setReducerClass(ReduceJoinReducer.class);
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(Text.class);
