@@ -8,7 +8,6 @@
         <outputRelativeToContentRoot value="true" />
         <module name="ReduceJoin" />
         <module name="WordCountv2" />
-        <module name="PORR" />
       </profile>
     </annotationProcessing>
   </component>
