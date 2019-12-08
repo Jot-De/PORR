@@ -5,6 +5,7 @@ spark = SparkContext(conf=conf)
 file_names = spark.textFile("hdfs:///friends/names.txt")
 file_rel = spark.textFile("hdfs///friends/relations.txt")
 
+
 file_names = file_names.flatMap(lambda line: line.split(","))
 file_rel = file_rel.flatMap(lambda line: line.split(","))
 
