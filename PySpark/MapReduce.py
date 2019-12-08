@@ -12,4 +12,4 @@ rdd_names = file_names.map(lambda id_: (id_.split(",")[0], "name" + "   " + id_.
 rdd_rel = file_names.map(lambda id_: (id_.split(",")[0], "rel" + "   " + id_.split(",")[1]))
 rdd = rdd_names.join(rdd_rel)
 context = rdd.reduceByKey(lambda a, b: a + b)
-context.saveAstTextFile("hdfs///friends/output/spark.txt")
+context.saveAsTextFile("hdfs///friends/output/spark.txt")
