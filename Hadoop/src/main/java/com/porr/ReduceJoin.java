@@ -23,6 +23,7 @@ public class ReduceJoin {
             String record = value.toString();
             String[] parts = record.split(",");
             context.write(new Text(parts[0]), new Text("cust   " + parts[1]));
+            context.write(new Text(parts[1]), new Text("cust   " + parts[0]));
             System.out.println(context);
         }
     }
